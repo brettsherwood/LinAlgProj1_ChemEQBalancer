@@ -1,0 +1,427 @@
+\documentclass[10pt]{article}
+
+\usepackage[utf8]{inputenc} % set input encoding (not needed with XeLaTeX)
+\usepackage[document]{ragged2e} % used for text alignment
+
+\usepackage{geometry} % to change the page dimensions
+\geometry{a4paper} % or letterpaper (US) or a5paper or\dots.
+\geometry{margin=.5in} % change the margins to .5 inches all round
+
+%\setlength{\parskip}{1em} % sets width between paragraphs
+
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{harpoon} % use to add ``harpoons'' over letters for vector notation
+\usepackage{amssymb} % symbolsss
+
+\usepackage{multicol}	% for multi columns
+\setlength{\columnsep}{.5cm} % change separation width of columns
+
+\usepackage{soul} % for underlines - \ul
+\setul{1pt}{.4pt} % 1pt below text, .4pt width
+
+\usepackage{amsmath} % all the math things - \text and \quad
+
+\usepackage{listings}
+\usepackage{xcolor}
+ 
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+ 
+\lstdefinestyle{mystyle}{
+  backgroundcolor=\color{backcolour},  
+  commentstyle=\color{red},
+  keywordstyle=\bf\color{magenta},
+  numberstyle=\tiny\color{codegray},
+  stringstyle=\color{codepurple},
+  basicstyle=\sffamily\small,
+  breakatwhitespace=false,     
+  breaklines=true,         
+  captionpos=b,          
+  keepspaces=true,         
+  numbers=left,          
+  numbersep=5pt,         
+  showspaces=false,        
+  showstringspaces=false,
+  showtabs=false,         
+  tabsize=2,
+  frame=single,
+  rulecolor=\color{black}
+}
+\lstset{style=mystyle}
+
+% backgroundcolor - colour for the background. External color or xcolor package needed.
+% commentstyle - style of comments in source language.
+% basicstyle - font size/family/etc. for source (e.g. basicstyle=\ttfamily\small)
+% keywordstyle - style of keywords in source language (e.g. keywordstyle=\color{red})
+% numberstyle - style used for line-numbers
+% numbersep - distance of line-numbers from the code
+% stringstyle - style of strings in source language
+% showspaces - emphasize spaces in code (true/false)
+% showstringspaces - emphasize spaces in strings (true/false)
+% showtabs - emphasize tabulators in code (true/false)
+% numbers - position of line numbers (left/right/none, i.e. no line numbers)
+% prebreak - displaying mark on the end of breaking line (e.g. prebreak=\raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}})
+% captionpos - position of caption (t/b)
+% frame - showing frame outside code (none/leftline/topline/bottomline/lines/single/shadowbox)
+% breakwhitespace - sets if automatic breaks should only happen at whitespaces
+% breaklines - automatic line-breaking
+% keepspaces - keep spaces in the code, useful for indetation
+% tabsize - default tabsize
+% escapeinside - specify characters to escape from source code to LATEX (e.g. escapeinside={\%*}{*)})
+% rulecolor - Specify the colour of the frame-box
+
+\begin{document}
+
+\begin{center}
+{\huge \bf Balancing Chemical Equations} \\
+\vspace*{.5cm}
+{\large Brett Webb \\
+Red Rocks Community College \\
+MAT 225-002 Linear Algebra \\
+Professor: Adam Forland \\
+\vspace*{.5cm}
+October $4^{th}$, 2019} 
+\end{center}
+
+\section*{The Problem}
+Our software development team has been asked to write a piece of software for a local highschool chemistry class.
+The intention is to allow the students to enter in a chemical equation and the program will output the balanced 
+equation (if possible). In addition, the software should include code comments to express how the code is working
+as well as markdown/latex comments to express how the math (and chemistry) is working.
+
+\section{Introduction}
+As descrbed above, our goal was to develop a Python program that utilizes Linear Algebra to balance a given chemical
+equation. Chemical equations describe the quantities of substances consumed and produced by chemcial reactions. The 
+Law of Conservation of Mass states that no atoms can be created nor destroyed in a chmeical reaction. This means that
+the number of atoms of the reactants (the left side of the equation) must be equal to the number of atoms of the
+products(the right side). So in order to balance an equation, coefficients must be added to the molecules of the equation.
+In the example and code to follow, you will see the process of how this is done by hand using matrix operations, and then
+by the program that was developed.
+
+%Written introduction and the results. Just like 5-6 sentences about what this paper is going to show and what happened.
+%Explain the process and what not.
+
+\section{Example}
+
+For this example, we will use the following chemical equation,
+\[
+(x_{1})AgNO_{3} + (x_{2})MgCl_{2} \to (x_{3})AgCl + (x_{4})Mg(NO_{3})_{2}
+\]
+Notice the coefficients that are in front of the molecules, these are placeholders just to represent the variables that
+we will be solving for in the following calculations. Keep in mind, these will always be integer numbers. \\
+\hfill
+
+First, we must convert the reactants and products into vectors,
+\[
+AgNO_{3} = \left[ \begin{array}{c} 1 \\ 1 \\ 3 \\ 0 \\ 0 \\ \end{array} \right], 
+MgCl_{2} = \left[ \begin{array}{c} 0 \\ 0 \\ 0 \\ 1 \\ 2 \\ \end{array} \right],
+AgCl = \left[ \begin{array}{c} 1 \\ 0 \\ 0 \\ 0 \\ 1 \\ \end{array} \right],
+Mg(NO_{3})_{2} = \left[ \begin{array}{c} 0 \\ 2 \\ 6 \\ 1 \\ 0 \\ \end{array} \right]
+\hspace{1cm} \left[ \begin{array}{c} Ag \\ N \\ O \\ Mg \\ Cl \\ \end{array} \right]
+\]
+These vectors each describe the numbers of atoms per molecule for each type of element present in the reaction. On the right
+you can see a visual representation of what element each row represents. Since the first reactant has three different atoms
+($Ag$, $N$, and $O$) the corresponding number of atoms in that molecule in placed in the vector in their corresponding
+positions. Notice the last vector, the outside subscript of 2 represents that there are two molecules of $NO_{3}$ which means
+there are a total of 2 $N$ atoms and 6 $O$ atoms.
+
+\begin{multicols}{2}
+Next, we replace the molecules in our equation with their given vectors and replace the $\to$ arrow with an equals sign
+because we are trying to solve for the coefficiants that must satisy the equation.
+\[
+x_{1} \left[ \begin{array}{c} 1 \\ 1 \\ 3 \\ 0 \\ 0 \\ \end{array} \right] + 
+x_{2} \left[ \begin{array}{c} 0 \\ 0 \\ 0 \\ 1 \\ 2 \\ \end{array} \right] = 
+x_{3} \left[ \begin{array}{c} 1 \\ 0 \\ 0 \\ 0 \\ 1 \\ \end{array} \right] +
+x_{4} \left[ \begin{array}{c} 0 \\ 2 \\ 6 \\ 1 \\ 0 \\ \end{array} \right]
+\]
+
+We then move all of the terms to left side of the equation to set the equation equal to 0. In this case, since we are using
+vectors, we use the zero vector, $\overrightharp{0}$. This will change the signs of the vectors from the right side of the equation.
+\[
+x_{1} \left[ \begin{array}{c} 1 \\ 1 \\ 3 \\ 0 \\ 0 \\ \end{array} \right] + 
+x_{2} \left[ \begin{array}{c} 0 \\ 0 \\ 0 \\ 1 \\ 2 \\ \end{array} \right] + 
+x_{3} \left[ \begin{array}{c} -1 \\ 0 \\ 0 \\ 0 \\ -1 \\ \end{array} \right] +
+x_{4} \left[ \begin{array}{c} 0 \\ -2 \\ -6 \\ -1 \\ 0 \\ \end{array} \right] =
+\left[ \begin{array}{c} 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ \end{array} \right]
+\]
+
+From here, we can create the augmented matrix of the system in which our vectors become the columns of the matrix and
+the solution to our matrix, $\overrightharp{0}$, is separated by a vertical line.
+\[
+\left[
+\begin{array}{cccc|c}
+1 & 0 & -1 & 0 & 0 \\
+1 & 0 & 0 & -2 & 0 \\
+3 & 0 & 0 & -6 & 0 \\
+0 & 1 & 0 & -1 & 0 \\
+0 & 2 & -1 & 0 & 0 \\
+\end{array}
+\right]
+\]
+
+We then apply row reduce the matrix using row operations.
+\[ 
+\implies
+\left[
+\begin{array}{cccc|c}
+1 & 0 & -1 & 0 & 0 \\
+1 & 0 & 0 & -2 & 0 \\
+0 & 0 & 0 & 0 & 0 \\
+0 & 1 & 0 & -1 & 0 \\
+0 & 2 &-1 & 0 & 0 \\
+\end{array}
+\right]
+\]
+\[
+\implies
+\left[
+\begin{array}{cccc|c}
+1 & 0 & -1 & 0 & 0 \\
+0 & 0 & 1 & -2 & 0 \\
+0 & 0 & 0 & 0 & 0 \\
+0 & 1 & 0 & -1 & 0 \\
+0 & 0 & -1 & 2 & 0 \\
+\end{array}
+\right]
+\]
+\[
+\implies
+\left[ 
+\begin{array}{cccc|c}
+1 & 0 & -1 & 0 & 0 \\
+0 & 1 & 0 & -1 & 0 \\
+0 & 0 & 1 & -2 & 0 \\
+0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 \\
+\end{array}
+\right]
+\]
+
+After row reduction we are left with our matrix in ``Row Reduced Echelon Form'' (RREF).
+\[
+\left[
+\begin{array}{cccc|c}
+1 & 0 & 0 & -2 & 0 \\
+0 & 1 & 0 & -1 & 0 \\
+0 & 0 & 1 & -2 & 0 \\
+0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 \\
+\end{array}
+\right]
+\]
+
+The solution to our matrix is then shown as,
+\[
+x = 
+\left\{
+\begin{array}{l}
+x_{1} = 2x_{4} \\
+x_{2} = x_{4} \\
+x_{3} = 2x_{4} \\
+x_{4}\ is\ free \\
+\end{array}
+\right.
+\]
+
+Since $x_{4}$ is free, we can let it be equal to any number and it will still be a solution to our matrix. When balancing
+equations, it is best to keep coefficients as simplified as possible. So to do that, we let $x_{4} = 1$.
+\[
+x = 
+\left\{
+\begin{array}{l}
+x_{1} = 2 \\
+x_{2} = 1 \\
+x_{3} = 2 \\
+x_{4} = 1 \\
+\end{array}
+\right.
+\]
+
+These are the the coefficants to our chemcial equation. So, the balanced equation is
+\[
+2AgNO_{3} + MgCl_{2} \to 2AgCl + Mg(NO_{3})_{2}
+\]
+\end{multicols}
+
+\section{The Code}
+This code was developed through a collabaration effort between Jaden Adams, Connor Denney, Kevin Evers, Holly Hammons,
+Alex Langfield, Everett Oklar, Brett Webb, and Sophia Wyss with the supervision of our professor Adam Forland.
+
+This code will successfully take an unbalanced chemcial equation, convert it into a matrix, row reduce the matrix, solve for free variables, and find the solution, giving us the coefficients for the balanced chemical equation.
+\begin{lstlisting}[language = Python]
+from fractions import Fraction
+import math
+from sympy import *
+
+
+# Takes a string and a delimiter character is an input and splits the string at the specified delimiter. Outputs the string as a tuple split at the delimiter.
+def split(string, delimiter):	
+	output = [[]]				# Creates a tuple that will be the output of the function
+	counter = 0					# Used to count how many times we have split our string
+
+	for i in range(len(string)):			# Loop ``the number of characters in string'' times
+		if string[i] == delimiter:			# Tests if the current character is the delimiter
+			counter += 1									# Increment the counter
+			output.append([])							# Add a new string to the tuple
+		else:														# If the current character is not the delimiter
+			output[counter] += string[i]	# Add character to current string
+	return(output)										# Output the list of strings
+
+
+# Determines if an item is in a list and outputs the location of the item.
+def existsin(thelist, item):
+	for i in range(len(thelist)): 		# Loop ``the number of entries in thelist'' times
+		if thelist[i] == item: 					# Tests if the current item is the item we're looking for
+			return [True, i]							# Return True and location of the item.
+	return [False, 0]									# Returns False if the item is not in the current list.
+
+# Turns a compund string into a vector. inp is the compund string input; thiscompound is an empty vector of the same length in which we will store our resulting vector; elements is an empty list to keep track of what elements are in the equation. Outputs an updated elements list and the compound vector, thiscompound.
+def vectorizeCompound(inp, thiscompound, elements):
+	for i in range(len(inp)):				# Loop ``the number of characters in the string inp'' times
+		if inp[i].isnumeric() == False:				# Tests if the current character is not a number 
+			if i == 0:				# Tests if this is the first character in the element 
+				elements.append(inp[i])				# Add character to elements list
+				continue					# Skip the rest of this iteration and go to the next one
+			if inp[i-1].isnumeric() == False:		# Tests if the last character was also not a number
+				elements[len(elements)-1] += inp[i]				# Add this character to the existing character, rather than making a new item for that character
+			else:
+				elements.append(inp[i])		# Else if it's just a lone letter so far, add it to the list
+    
+		else:		# Else if the current character is a number
+			if len(elements) == 0:		# If there are no elements yet in the list
+				continue				# Something went wrong, so just keep going
+			if inp[i-1].isnumeric():				# If the last character was also a number
+				thiscompound[Existence[1]] = inp[i-1] + inp[i]				# Add this character to the existing number ** (concatination of strings, not addition)
+				continue				# Continue to next iteration to avoid redefining the entry 
+			NewElement = elements.pop(len(elements)-1)		# Remove the last element from the list
+			Existence = existsin(elements, NewElement)		# Check to see if this element has already been counted
+			if Existence[0] == False:		# If element has not been counted
+				elements.append(NewElement)			# Add this element to the elements list
+				thiscompound[len(elements)-1] = inp[i]		# Add the current number to the vector
+				Existence[1] = len(elements)-1	# For the case where you have a multi-digit number **
+			else:			# If the element has already been counted
+				thiscompound[Existence[1]] = inp[i]		# Put this number in the appropriate place on the list.
+    return [elements, thiscompound]		# Return the updated elements list and the compounds vector
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+equation = input("Please enter the chemical equation: \nUse no spaces. Use '=' for the arrow. Do not exclude 1 as a subscript. Simplify all compounds.")			# Asks user to enter equation
+numElements = int(input("Count the total number of elements in the equation \n For example CHO+O2=CO2+H20 has 3 elements, C H and O."))			# Asks user to enter number of elements in equation
+globalElements = []	# A list to keep track of which elements are which entry in each vector
+
+sides = split(equation, '=')			# Splits the equation into the reactants and the products
+if len(sides) != 2:		# Test if there is more than one product string and one reactant string
+	print("!!!Product/reactant split error!!!")				# Print error message is this happens
+
+reactants = split(sides[0],'+') 	# Takes first entry of sides[] and splits it, these are the reactants
+vector = [] 		# An empty vector to use in the following loop
+reactantVectors = [] # This will be a list of lists to keep track of all the vectors for the reactants
+
+# Creates an empty vector for each reactant and each vector is the appropriate size for the number of elements.
+for i in reactants:  			# For each entry in list reactants
+	vector = []  					# Zero out the vector
+	for i in range(numElements):	 # Loop ``the number of elements, numElements'' times
+		vector.append(0)     					# Add a zero to the vector
+	reactantVectors.append(vector) 		# Add that vector to our reactant Vectors
+
+for i in range(len(reactants)):  # Loop ``for how many items in list reactant'' times
+	# Vectorize the reactant. Inputs the reactant string, the corresponding empty vector, and the list of elements
+	vectorization = vectorizeCompound(reactants[i], reactantVectors[i], globalElements)
+	globalElements = vectorization[0]  	# Update element list
+	reactantVectors[i] = vectorization[1]		# Update the compound vectors.
+
+# The following section is the exact same is above, just for the products of the equation
+products = split(sides[1],'+')  	# Takes second entry of sides[] and splits it, these are the products
+vector = []
+productVectors = []
+for i in products:
+	vector = []
+	for i in range(numElements):
+		vector.append(0)
+	productVectors.append(vector)
+  
+for i in range(len(products)):
+	vectorization = vectorizeCompound(products[i], productVectors[i], globalElements)
+	globalElements = vectorization[0]
+	productVectors[i] = vectorization[1]
+ 
+ # Multiplies all entries of the product vectors by -1 to simulate when we moved them across the equals sign.
+for i in range(len(productVectors)):			# Loop through only the product vectors
+	for c in range(len(productVectors[i])):		# Loop through all the entries in each vector
+		productVectors[i][c] = -1 * int(productVectors[i][c])			# Multiply them all by -1
+    
+equationMatrix = reactantVectors # Create a new matrix (list of lists) that will store both reactant vectors and product vectors. This starts the list by copying the reactantVectors
+for i in productVectors:     # For all the rows in the product matrix, add them to the matrix
+	equationMatrix.append(i)
+  
+E = Matrix(equationMatrix)   # Converts the list of lists into an sympy matrix
+E = E.transpose()        # Transpose the matrix so that the now row vectors become column vectors
+A = E.rref()          # Row reduce this matrix and call it A
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+FreeVariables = []    	# Create a list for the free variables
+for i in equationMatrix:   # This is the list of lists that became the matrix E. Since E got transposed, the number of items in this variable is the number of columns in the matrix E
+	FreeVariables.append(1)  # Create an entry in the free variables list for every column of the matrix
+
+for i in range(len(E.rref()[1])): # Loops ``for number of columns of E with pivots in them'' times
+	FreeVariables[E.rref()[1][i]] = 0 # 'Turn off' each of our columns that is not associated with a free variable
+
+Entries = [] 		# Save the value for what we should choose our free variables to be, so every output is a whole number
+for c in range(len(FreeVariables)):		# Iterate through our free variables list
+	if FreeVariables[c] == 1:			# If this column represents a free variable
+		for r in range(E.shape[0]):		# Iterate through the entries of that column
+			if A[0][r,c] != 0:			# As long as the entry is not zero
+				Entries.append(Fraction(str(A[0][r,c])).denominator)  		# Then save the denominator of the fraction
+# The str(-sympy rational-) is neccesary because the float makes the denominator innacurate -- it will evaluate 1/3 as 3333333/10000000  
+
+# Finds the least common multiple of two numbers
+def lcm(a,b):       
+	return (a*b) / math.gcd(a,b)  	# The product of the two numbers, divided by the greatest common divisor of those two.
+
+
+Current = Entries[0]  # This is just an initial condition to avoid out of range index errors **
+for i in range(len(Entries)): # Iterate through our denominator list
+	if i == 0:    # Forget the first entry, we already set that up above **
+		continue  
+	Current = lcm(int(Current), int(Entries[i])) # Find the least common multiple of the current least common multiple and the current entry in the list.
+
+V = [] 		# A vector to multiply our rows by to get to the solution.
+for i in FreeVariables:  		# Iterate through our free variables list
+	if i == 1:     						# If the column is associated with a free variable
+		V.append(Current) 			# Multiply it by the largest multiple
+	else:         						# If the column is a pivot column
+		V.append(0)   			 		# Zero the column out
+		# This way, when we add the rows together we will get what the other variables equal.
+
+
+F = A[0] * Matrix(V) 		# Do this multiplication to get our answer as F
+
+Coefficients = []      		# An output medium for the solution     
+for i in range(len(FreeVariables)):  	# Iterate through our columns
+	if FreeVariables[i] == 1:    	 # If it represents our free variable
+		Coefficients.append(int(Current))		# Make this free variable our chosen amount that makes all the numbers whole
+	else: 			# If the column is not a free variable
+		Coefficients.append(-1 * int(F[i])) # Just take that entry from our solution vector, and invert it.
+print(equation)  			# Print the equation we set out to solve
+print(Coefficients) 	# and the coefficients we have solved for.
+print("These are the coefficients in order that the compounds occur.")  # Hopefully it works.
+\end{lstlisting}
+
+\section{Conclusion}
+%For conclusion, just reiterate all this stuff, ``now that they've read it'' and just talk about what we could do differently
+%or what could we do more.
+It is amazing to see how a process such as balancing a chemical equation can seem so simple to do by hand but then look so
+complicated when being coded for a program. This is because we need to write very specific instructions for the computer to
+follow in order to do such a task. In doing this, we have created a much faster and more efficient way of balancing chemical
+equations than by doing them by hand. This would then save people time and money. However, this code can be improved in
+many ways and made more efficient. For example, it could be altered so that the user does not have to enter the equation
+without spaces or so that they would not have to enter a 1 for atoms without subscripts. Future implications of this program
+could be adding in some sort of GUI for the user to interact with or adding graphics so they can visually see the process of
+balancing the chemical equation. In reading this, I hope you have gained a better understanding of the process of balancing a
+chemical equation using linear algebra and the use of programming and technology to improve it.
+
+\end{document}
